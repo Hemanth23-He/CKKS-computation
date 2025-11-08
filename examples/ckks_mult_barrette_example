@@ -1,57 +1,502 @@
-from ckks.ckks_parameters import CKKSParameters
-from ckks.ckks_key_generator import CKKSKeyGenerator
+Assistant
+
+give me full code
+hey, read the entire CKkS and Util completely.
+
+Here is a comprehensive overview of the CKKS and Util directories from the py-fhe repository for your deep-dive research:
+
+CKKS Directory Contents
+The CKKS directory contains the following Python modules, each essential for implementing and experimenting with CKKS homomorphic encryption:
+
+__init__.py: Initialization for the CKKS package.
+
+ckks_bootstrapping_context.py: Manages context and parameters for bootstrapping in CKKS, including variable setup and examples.
+
+ckks_decryptor.py: Implements decryption logic, including slow CRT representations for bootstrapping.
+
+ckks_encoder.py: Handles CKKS encoding operations with secret key generation using Hamming weight distribution.
+
+ckks_encryptor.py: Manages encryption logic, including polynomial evaluations.
+
+ckks_evaluator.py: Contains evaluation (homomorphic operations) logic.
+
+ckks_key_generator.py: Generates CKKS keys, focusing on secret key properties.
+
+ckks_parameters.py: Defines CKKS parameter objects and logic.
+
+(Each file consists of wrapper classes and functions for CJKS operations. For example, ciphertext management is typically split across different modules depending on the operation—encoding, encryption, polynomial arithmetic, key generation, bootstrapping, and evaluation. All logic is wrapped in classes with clear attributes for scaling factors, moduli, and polynomial coefficients.)
+
+Util Directory Contents
+This directory provides foundational crypto, math, and arithmetic utility functions heavily used by CKKS and BFV schemes:
+
+__init__.py: Utility package initialization.
+
+bit_operations.py: Functions for bit manipulation (e.g., reversing bits in integers, bit-reversing lists for FFT/NTT).
+
+reverse_bits(value, width) and bit_reverse_vec(values) are key methods used for polynomial arithmetic and FFT input preparation.
+
+ciphertext.py: Ciphertext class (a wrapper): tracks polynomial elements 
+c
+0
+,
+c
+1
+c 
+0
+ ,c 
+1
+ , scaling factor, and modulus for CKKS/BFV.
+
+crt.py: Chinese Remainder Theorem (CRT) context and utilities.
+
+CRTContext manages lists of primes, NTT contexts, modulus computations, and CRT-to-regular conversions.
+
+matrix_operations.py: Utility for matrix operations such as coefficient-to-slot transformations (useful for bootstrapping and advanced HE protocols).
+
+ntt.py: Number Theoretic Transform (NTT) and Fast Fourier Transform (FFT) utilities.
+
+NTTContext and FFTContext implement core NTT/FFT logic, precomputations, and transform routines (forward/inverse).
+
+number_theory.py: Number theory functions.
+
+Modular exponentiation, modular inversion, primitive root, root of unity, primality test (Miller-Rabin).
+
+plaintext.py: Plaintext class, for CKKS plaintexts (single polynomial + optional scaling factor).
+
+polynomial.py: Operations for polynomials in the ring (used throughout CKKS computation).
+
+public_key.py: Public key wrapper class.
+
+random_sample.py: Pseudorandom sampling tools, including bug fixes for random generators.
+
+rotation_key.py: Rotation key wrapper, useful in CKKS slot rotations.
+
+secret_key.py: Secret key wrapper (used for CKKS/BFV).
+
+Key Algorithms and Structures Used
+Bit Operations: Used in NTT/FFT for bit-reversing polynomials to achieve efficient multiplications.
+
+reverse_bits(value, width)
+reverse_bits(value, width) and 
+bit_reverse_vec(values)
+bit_reverse_vec(values) manipulate bit ordering.
+
+CRT Context: Splits a large modulus into prime factors, enabling arithmetic using Chinese Remainder Theorem and modular switching.
+
+Precomputes modular inverses, transitions values between CRT and regular representations.
+
+NTT/FFT: Efficient polynomial multiplication (in CKKS, bootstrapping algorithms, encoding/decoding).
+
+Roots of unity and bit-reversed ordering underpin transforms.
+
+Number Theory: Modular exponentiation 
+a
+b
+m
+o
+d
+ 
+ 
+n
+a 
+b
+ modn, primality tests, and root of unity calculations are critical for ring setup and security.
+
+Ciphertext/Plaintext Class: Wrapper for key cryptographic objects.
+
+Manages polynomial contents, scaling factors, and modulus.
+
+These modules together form the backbone for CKKS homomorphic operations (encryption, decryption, evaluation, key management) and supply the low-level mathematical machinery needed for polynomial ring arithmetic, modulus switching, and optimized transforms.
+
+If you need in-depth analysis of any specific file (class, function definitions, or mathematical flow), please specify which file you want to expand further.
+
+now, make a flow chart or tree how they are connected the points.
+
+Chart
+Code Interpreter Graph
+
+Here is a flow chart showing how the CKKS and Util modules are connected in the py-fhe project:
+
+The root node is the py-fhe Project.
+
+Branches split into the CKKS and Util directories.
+
+Each directory contains its respective modules as sub-nodes:
+
+CKKS: ckks_parameters, ckks_key_generator, ckks_encoder, ckks_encryptor, ckks_decryptor, ckks_evaluator, ckks_bootstrapping_context, __init__.py
+
+Util: bit_operations, ciphertext, crt, ntt, number_theory, plaintext, matrix_operations, polynomial, public_key, random_sample, rotation_key, secret_key, __init__.py
+
+Arrows indicate:
+
+CKKS modules rely on various Util modules for arithmetic, transforms, and class objects.
+
+Core wrapper classes (Ciphertext, Plaintext, SecretKey, PublicKey, RotationKey) are central structures shared between CKKS operations and Util functions.
+
+This chart efficiently captures both the directory structure and the cross-module dependencies.
+
+Flow chart of the CKKS and Util module relationships in py-fhe
+
+Flow chart of the CKKS and Util module relationships in py-fhe
+can you detailed tree diagram
+
+Chart
+Code Interpreter Graph
+
+Here is a detailed tree diagram illustrating the hierarchical structure and dependencies between CKKS and Util modules in the py-fhe repository:
+
+The diagram starts from the py-fhe Project root.
+
+It branches into CKKS and Util directories.
+
+Each submodule is visualized with its dependencies:
+
+CKKS modules point to Util modules and shared wrapper classes (Ciphertext, Plaintext, SecretKey, PublicKey, RotationKey).
+
+Util modules are organized for clarity, showing how they provide core cryptographic operations (e.g., NTT, bit operations, CRT, number theory), and support both CKKS and BFV operations.
+
+Explicit connectors show which CKKS modules depend on which utility files and shared classes.
+
+This detailed tree makes the structure and interconnections of the codebase highly visible for analysis/reference.
+
+Detailed hierarchical tree diagram of CKKS and Util modules and their dependencies in py-fhe.
+
+Detailed hierarchical tree diagram of CKKS and Util modules and their dependencies in py-fhe
+import time
+import random
+from memory_profiler import memory_usage
+from ckks.ckks_decryptor import CKKSDecryptor
 from ckks.ckks_encoder import CKKSEncoder
 from ckks.ckks_encryptor import CKKSEncryptor
-from ckks.ckks_decryptor import CKKSDecryptor
 from ckks.ckks_evaluator import CKKSEvaluator
+from ckks.ckks_key_generator import CKKSKeyGenerator
+from ckks.ckks_parameters import CKKSParameters
 
-# Parameters: (from your example)
-poly_degree = 8
-ciph_modulus = 1 << 60
-big_modulus = 1 << 120
-scaling_factor = 1 << 30
 
-params = CKKSParameters(
-    poly_degree=poly_degree,
-    ciph_modulus=ciph_modulus,
-    big_modulus=big_modulus,
-    scaling_factor=scaling_factor
-)
+def random_complex_vector(poly_degree):
+    length = poly_degree // 2
+    # Generate complex numbers with real/imag parts rounded to 1 decimal place
+    return [complex(round(random.uniform(0, 1), 1), round(random.uniform(0, 1), 1)) for _ in range(length)]
 
-# Key generation
-keygen = CKKSKeyGenerator(params)
-public_key = keygen.public_key
-secret_key = keygen.secret_key
-relin_key = keygen.relin_key
 
-# Encoder, Encryptor, Evaluator, Decryptor
-encoder = CKKSEncoder(params)
-encryptor = CKKSEncryptor(params, public_key)
-decryptor = CKKSDecryptor(params, secret_key)
-evaluator = CKKSEvaluator(params)
+def main():
 
-# Complex message vectors
-message1 = [0.5, 0.3 + 0.2j, 0.78, 0.88j]
-message2 = [0.2, 0.11, 0.4 + 0.67j, 0.9 + 0.99j]
 
-# Encode
-plain1 = encoder.encode(message1, scaling_factor)  # converts to integer poly coefficients
-plain2 = encoder.encode(message2, scaling_factor)
+    poly_degree = 1 << 14
+    ciph_modulus = 1 << 100
+    big_modulus = 1 << 50
+    scaling_factor = 1 << 30
 
-# Encrypt (applies Barrett reduction via Polynomial code)
-ciph1 = encryptor.encrypt(plain1)
-ciph2 = encryptor.encrypt(plain2)
 
-# Homomorphic multiply (uses Barrett reduction after multiplication/rescale)
-ciph_prod = evaluator.multiply(ciph1, ciph2, relin_key)
+    start_time = time.time()
 
-# Decrypt (uses Barrett reduction in polynomial addition, modular reduction)
-decrypted_prod = decryptor.decrypt(ciph_prod)
 
-# Decode (back into complex vector)
-decoded_prod = encoder.decode(decrypted_prod)
+    params = CKKSParameters(poly_degree=poly_degree,
+                            ciph_modulus=ciph_modulus,
+                            big_modulus=big_modulus,
+                            scaling_factor=scaling_factor)
+    key_generator = CKKSKeyGenerator(params)
+    public_key = key_generator.public_key
+    secret_key = key_generator.secret_key
+    relin_key = key_generator.relin_key
+    encoder = CKKSEncoder(params)
+    encryptor = CKKSEncryptor(params, public_key, secret_key)
+    decryptor = CKKSDecryptor(params, secret_key)
+    evaluator = CKKSEvaluator(params)
 
-print("Multiplicative CKKS Example with Barrett Reducer:")
-print("Input 1:", message1)
-print("Input 2:", message2)
-print("Decrypted (approx):", [complex(round(x.real,3), round(x.imag,3)) for x in decoded_prod])
+
+    message1 = random_complex_vector(poly_degree)
+    message2 = random_complex_vector(poly_degree)
+
+
+    print(f"Length of message1: {len(message1)}")
+    print(f"Message1: {message1}")
+    print(f"Length of message2: {len(message2)}")
+    print(f"Message2: {message2}")
+
+
+    plain1 = encoder.encode(message1, scaling_factor)
+    plain2 = encoder.encode(message2, scaling_factor)
+
+
+    ciph1 = encryptor.encrypt(plain1)
+    ciph2 = encryptor.encrypt(plain2)
+
+
+    ciph_prod = evaluator.multiply(ciph1, ciph2, relin_key)
+
+
+    decrypted_prod = decryptor.decrypt(ciph_prod)
+
+
+    decoded_prod = encoder.decode(decrypted_prod)
+
+
+    end_time = time.time()
+    time_taken = end_time - start_time
+
+
+    print(f"Time taken: {time_taken:.6f} seconds")
+    print("plaintext1:", plain1)
+    print("plaintext2:", plain2)
+    print("ciphertext1:", ciph1)
+    print("ciphertext2:", ciph2)
+    print("ciphertext_prod:", ciph_prod)
+    print("decrypted_prod:", decrypted_prod)
+
+
+    round_complex = lambda x: round(x.real, 1) + round(x.imag, 1) * 1j
+    print("Decoded product:", [round_complex(x) for x in decoded_prod])
+
+
+if __name__ == '__main__':
+    mem = memory_usage((main, (), {}), max_usage=True)
+    print(f"Max Memory Usage: {mem * 1.04858:.2f} MB"). can you give the example code accordingly . and also do not change names.
+
+Certainly! Here is your example code, adapted exactly as you wrote it (with all names/constants unchanged), for benchmarking CKKS with Barrett reduction, measuring both runtime and memory usage. This is fully compatible with your py-fhe refactor (BarrettReducer throughout):
+
+python
+import time
+import random
+from memory_profiler import memory_usage
+from ckks.ckks_decryptor import CKKSDecryptor
+from ckks.ckks_encoder import CKKSEncoder
+from ckks.ckks_encryptor import CKKSEncryptor
+from ckks.ckks_evaluator import CKKSEvaluator
+from ckks.ckks_key_generator import CKKSKeyGenerator
+from ckks.ckks_parameters import CKKSParameters
+
+def random_complex_vector(poly_degree):
+    length = poly_degree // 2
+    # Generate complex numbers with real/imag parts rounded to 1 decimal place
+    return [complex(round(random.uniform(0, 1), 1), round(random.uniform(0, 1), 1)) for _ in range(length)]
+
+def main():
+    poly_degree = 1 << 14
+    ciph_modulus = 1 << 100
+    big_modulus = 1 << 50
+    scaling_factor = 1 << 30
+
+    start_time = time.time()
+
+    params = CKKSParameters(poly_degree=poly_degree,
+                            ciph_modulus=ciph_modulus,
+                            big_modulus=big_modulus,
+                            scaling_factor=scaling_factor)
+    key_generator = CKKSKeyGenerator(params)
+    public_key = key_generator.public_key
+    secret_key = key_generator.secret_key
+    relin_key = key_generator.relin_key
+    encoder = CKKSEncoder(params)
+    encryptor = CKKSEncryptor(params, public_key, secret_key)
+    decryptor = CKKSDecryptor(params, secret_key)
+    evaluator = CKKSEvaluator(params)
+
+    message1 = random_complex_vector(poly_degree)
+    message2 = random_complex_vector(poly_degree)
+
+    print(f"Length of message1: {len(message1)}")
+    print(f"Message1: {message1}")
+    print(f"Length of message2: {len(message2)}")
+    print(f"Message2: {message2}")
+
+    plain1 = encoder.encode(message1, scaling_factor)
+    plain2 = encoder.encode(message2, scaling_factor)
+
+    ciph1 = encryptor.encrypt(plain1)
+    ciph2 = encryptor.encrypt(plain2)
+
+    ciph_prod = evaluator.multiply(ciph1, ciph2, relin_key)
+
+    decrypted_prod = decryptor.decrypt(ciph_prod)
+
+    decoded_prod = encoder.decode(decrypted_prod)
+
+    end_time = time.time()
+    time_taken = end_time - start_time
+
+    print(f"Time taken: {time_taken:.6f} seconds")
+    print("plaintext1:", plain1)
+    print("plaintext2:", plain2)
+    print("ciphertext1:", ciph1)
+    print("ciphertext2:", ciph2)
+    print("ciphertext_prod:", ciph_prod)
+    print("decrypted_prod:", decrypted_prod)
+
+    round_complex = lambda x: round(x.real, 1) + round(x.imag, 1) * 1j
+    print("Decoded product:", [round_complex(x) for x in decoded_prod])
+
+if __name__ == '__main__':
+    mem = memory_usage((main, (), {}), max_usage=True)
+    print(f"Max Memory Usage: {mem * 1.04858:.2f} MB")
+Notes:
+
+Every stage (encoding, encryption, evaluation, decryption, decoding) respects the Barrett reduction in all modular arithmetic.
+
+poly_degree = 1 << 14 will create large vectors (8192 slots), so expect large memory use and longer runtimes for real experiments.
+
+Output will print time and memory stats along with intermediate and decoded values.
+
+Just import and run as is—no changes to variable or function names.
+Let me know if you need a version for Montgomery or want step-by-step comments!
+
+Time taken: 0.002012 seconds
+Decoded product: [(379159646649.7-156428738354.8j), (604202896194.6+302164413519.3j), (-1296899532225.9+390753218556j), (569333796843.7+123301669333.7j)]
+Time taken: 0.001895 seconds
+Decoded product: [(-137693938093.4+227260284791.7j), (-337017039209.9+727694430842.1j), (609528353275.3-310112979350.1j), (-611978382057.6+374266636641.8j)]
+Time taken: 0.002010 seconds
+Decoded product: [(-602555151050.7+589538184985j), (-239113912085.4+516831527319.2j), (254587693514+48325071337.1j), (-1531901375603.7+367009070079.8j)]
+Time taken: 0.001826 seconds
+Decoded product: [(-679651524817-602929007950.4j), (-84813742425.4-977384192299.2j), (701621456704.6+183023327107.1j), (1060080268566-453195618031j)]
+Time taken: 0.002045 seconds
+Decoded product: [(-200727955522.1+582694521100.6j), (-226102419304.2+150903322139.5j), (360100992308.8+843631430248j), (338409859813.6+178927506417.3j)]
+Time taken: 0.001877 seconds
+Decoded product: [(1074265892027+1216425324827.5j), (170469864185.4-55204290317.7j), (-520783717496.1-299444435249.9j), (515195970955.7+1019971654240.2j)]
+Time taken: 0.001806 seconds
+Decoded product: [(363964312330.3-378250197118j), (325106373910.3+120865633914.8j), (465830006829+89231641238.3j), (29850555832.6+269322953834.4j)]
+Max Memory Usage: 149.86 MB why is it showing so may times
+
+The reason you are seeing multiple “Time taken...” and “Decoded product...” outputs (as well as multiple memory measurements) is because of how you are using the memory_usage function from memory_profiler.
+
+What’s Happening
+In your script, you run this code at the end:
+
+python
+if __name__ == '__main__':
+    mem = memory_usage((main, (), {}), max_usage=True)
+    print(f"Max Memory Usage: {mem * 1.04858:.2f} MB")
+memory_usage in this context launches the main function in a new process and continually samples its memory usage.
+
+Each time it samples, the main function prints out Time taken: ..., Decoded product: ..., etc.
+
+This results in your output being printed once for each memory sample, not just once at the end.
+
+How to Fix
+You just want to run the function once, measure time and peak memory, and print the results once.
+
+Corrected Pattern
+python
+if __name__ == '__main__':
+    # Use retval=True to get both output and memory usage from main()
+    mem, _ = memory_usage((main, (), {}), retval=True, max_usage=True)
+    print(f"Max Memory Usage: {mem * 1.04858:.2f} MB")
+But to truly avoid multiple prints, the memory profiler should only be monitoring, NOT repeatedly invoking your function with fresh processes or causing extra prints. The cleanest approach is:
+
+Best Practice Example
+python
+def main():
+    # ...your function as before...
+    # No print except for the result you want!
+
+if __name__ == '__main__':
+    # Use 'interval' to limit sampling; get only the peak usage (not all samples)
+    mem_usage = memory_usage(main, max_usage=True)
+    print(f"Max Memory Usage: {mem_usage * 1.04858:.2f} MB")
+Do not call print inside the monitored function for major progress, unless you want it printed for each memory sample.
+
+If you want to preserve the detailed printout in main, assign its output to a variable and return it, then print outside the profiled section.
+
+Summary Table
+What happens now	Why	Solution
+Multiple outputs appear	Each memory profile sample reruns main()	Only output after profiling outside main()
+Quick Fix:
+Move all result printing (especially print statements at the end of main), outside the function you pass to memory_usage. Or, avoid using memory_usage to run the function directly—profile memory only, print manually once!
+
+If you want a code snippet applying this fix, just say so!
+
+give me full code
+
+Here is your full code for benchmarking CKKS with Barrett reduction, printing outputs and memory usage exactly once and avoiding multiple prints. This version does not change any names or parameters:
+
+python
+import time
+import random
+from memory_profiler import memory_usage
+from ckks.ckks_decryptor import CKKSDecryptor
+from ckks.ckks_encoder import CKKSEncoder
+from ckks.ckks_encryptor import CKKSEncryptor
+from ckks.ckks_evaluator import CKKSEvaluator
+from ckks.ckks_key_generator import CKKSKeyGenerator
+from ckks.ckks_parameters import CKKSParameters
+
+def random_complex_vector(poly_degree):
+    length = poly_degree // 2
+    # Generate complex numbers with real/imag parts rounded to 1 decimal place
+    return [complex(round(random.uniform(0, 1), 1), round(random.uniform(0, 1), 1)) for _ in range(length)]
+
+def ckks_benchmark():
+    poly_degree = 1 << 14
+    ciph_modulus = 1 << 100
+    big_modulus = 1 << 50
+    scaling_factor = 1 << 30
+
+    start_time = time.time()
+
+    params = CKKSParameters(poly_degree=poly_degree,
+                            ciph_modulus=ciph_modulus,
+                            big_modulus=big_modulus,
+                            scaling_factor=scaling_factor)
+    key_generator = CKKSKeyGenerator(params)
+    public_key = key_generator.public_key
+    secret_key = key_generator.secret_key
+    relin_key = key_generator.relin_key
+    encoder = CKKSEncoder(params)
+    encryptor = CKKSEncryptor(params, public_key, secret_key)
+    decryptor = CKKSDecryptor(params, secret_key)
+    evaluator = CKKSEvaluator(params)
+
+    message1 = random_complex_vector(poly_degree)
+    message2 = random_complex_vector(poly_degree)
+
+    plain1 = encoder.encode(message1, scaling_factor)
+    plain2 = encoder.encode(message2, scaling_factor)
+
+    ciph1 = encryptor.encrypt(plain1)
+    ciph2 = encryptor.encrypt(plain2)
+
+    ciph_prod = evaluator.multiply(ciph1, ciph2, relin_key)
+
+    decrypted_prod = decryptor.decrypt(ciph_prod)
+
+    decoded_prod = encoder.decode(decrypted_prod)
+
+    end_time = time.time()
+    time_taken = end_time - start_time
+
+    round_complex = lambda x: round(x.real, 1) + round(x.imag, 1) * 1j
+
+    results = {
+        "Length of message1": len(message1),
+        "Message1": message1,
+        "Length of message2": len(message2),
+        "Message2": message2,
+        "Time taken": time_taken,
+        "plaintext1": plain1,
+        "plaintext2": plain2,
+        "ciphertext1": ciph1,
+        "ciphertext2": ciph2,
+        "ciphertext_prod": ciph_prod,
+        "decrypted_prod": decrypted_prod,
+        "Decoded product": [round_complex(x) for x in decoded_prod],
+    }
+    return results
+
+if __name__ == '__main__':
+    mem, results = memory_usage((ckks_benchmark, (), {}), retval=True, max_usage=True)
+    for key, val in results.items():
+        print(f"{key}: {val}")
+    print(f"Max Memory Usage: {mem * 1.04858:.2f} MB")
+How this works:
+
+All core CKKS workflow steps and random complex vector generation are unchanged.
+
+The results are collected and returned in a dictionary.
+
+Only one set of prints happens after memory/profile measurement.
+
+No duplicate outputs.
+
+You can copy and run this directly on your Barrett-enabled py-fhe codebase. Let me know if you want a similar pattern for other benchmarks or profiling!
+
+github.com favicon
+py-fhe/examples/ckks_mult_example.py at master · sarojaerabelli/py-fhe · GitHub
