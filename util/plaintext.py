@@ -1,20 +1,16 @@
 """A module to keep track of a plaintext."""
+"""A module to keep track of a plaintext."""
 
 class Plaintext:
-
     """An instance of a plaintext.
-
     This is a wrapper class for a plaintext, which consists
     of one polynomial.
-
     Attributes:
         poly (Polynomial): Plaintext polynomial.
         scaling_factor (float): Scaling factor.
     """
-
     def __init__(self, poly, scaling_factor=None):
         """Sets plaintext to given polynomial.
-
         Args:
             poly (Polynomial): Plaintext polynomial.
             scaling_factor (float): Scaling factor.
@@ -24,8 +20,11 @@ class Plaintext:
 
     def __str__(self):
         """Represents plaintext as a readable string.
-
         Returns:
             A string which represents the Plaintext.
         """
         return str(self.poly)
+
+    # Example method if you add modular reduction support in future:
+    # def modular_reduce(self, reducer):
+    #     self.poly = [reducer.reduce(coeff) for coeff in self.poly]
